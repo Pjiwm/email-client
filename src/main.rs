@@ -1,5 +1,6 @@
 extern crate imap;
 extern crate native_tls;
+mod app;
 mod handlers;
 use handlers::{
     email_handler::{Email, SmtpConnectionManager},
@@ -7,31 +8,40 @@ use handlers::{
     imap_handler,
 };
 fn main() {
-    let pass = std::env::var("PASS").unwrap();
-    let user = std::env::var("USER").unwrap();
-
+    let pass = std::env::var("PASS");
+    let user = std::env::var("USER");
     let file_writer = FileManager::new("Users");
     println!("{:?}", imap_handler::search("Amy newman"));
     let search = match imap_handler::search("Amy newman") {
         Ok(s) => s,
         Err(_) => todo!(),
     };
-    let mut manager = SmtpConnectionManager::new("smtp.gmail.com", &user, &pass);
-    let new_email = Email::new(
-        "example.lmao@example.com",
-        "Bob Ross",
-        "New mail",
-        "I sent you this mail.",
-    );
-    new_email.send_email(&mut manager);
-    for result in search {
-        file_writer.write_file(&result);
+    if pass.is_ok() && user.is_ok() {
+        let user = user.unwrap();
+        let pass = pass.unwrap();
+        let mut manager = SmtpConnectionManager::new("smtp.gmail.com", &user, &pass);
+        let new_email = Email::new(
+            "example.lmao@example.com",
+            "Bob Ross",
+            "New mail",
+            "I sent you this mail.",
+        );
+        new_email.send_email(&mut manager);
+        for result in search {
+            file_writer.write_file(&result);
+        }
+        let email_body = fetch_inbox_top();
+        match email_body {
+            Ok(b) => println!("{}", b.unwrap()),
+            Err(_) => println!("Error!"),
+        }
     }
+    app::run();
 }
 
 #[allow(dead_code)]
 fn fetch_inbox_top() -> imap::error::Result<Option<String>> {
-    let domain = "imap.example.com";
+    let domain = "imap.gmail.com";
     let tls = native_tls::TlsConnector::builder().build().unwrap();
 
     // we pass in the domain twice to check that the server's TLS
@@ -40,9 +50,9 @@ fn fetch_inbox_top() -> imap::error::Result<Option<String>> {
 
     // the client we have here is unauthenticated.
     // to do anything useful with the e-mails, we need to log in
-    let mut imap_session = client
-        .login("me@example.com", "password")
-        .map_err(|e| e.0)?;
+    let pass = std::env::var("PASS").unwrap();
+    let user = std::env::var("USER").unwrap();
+    let mut imap_session = client.login(user, pass).map_err(|e| e.0)?;
 
     // we want to fetch the first email in the INBOX mailbox
     imap_session.select("INBOX")?;
