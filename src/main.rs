@@ -2,6 +2,7 @@ extern crate imap;
 extern crate native_tls;
 mod app;
 mod handlers;
+mod layout;
 use handlers::{
     email_handler::{Email, SmtpConnectionManager},
     file_handler::FileManager,
