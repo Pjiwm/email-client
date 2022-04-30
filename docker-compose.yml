@@ -1,0 +1,7 @@
+services:
+  rust:
+    container_name: rust_email
+    tty: true
+    build: .
+    ports:
+      - 6000:8080
