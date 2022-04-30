@@ -1,24 +1,33 @@
 extern crate imap;
 extern crate native_tls;
 mod handlers;
-use handlers::file_handler::FileManager;
-use handlers::imap_handler;
+use handlers::{
+    email_handler::{Email, SmtpConnectionManager},
+    file_handler::FileManager,
+    imap_handler,
+};
 fn main() {
+    let pass = std::env::var("PASS").unwrap();
+    let user = std::env::var("USER").unwrap();
+
     let file_writer = FileManager::new("Users");
-    println!("{:?}",imap_handler::search("Amy newman"));
+    println!("{:?}", imap_handler::search("Amy newman"));
     let search = match imap_handler::search("Amy newman") {
         Ok(s) => s,
         Err(_) => todo!(),
     };
-    
+    let mut manager = SmtpConnectionManager::new("smtp.gmail.com", &user, &pass);
+    let new_email = Email::new(
+        "example.lmao@example.com",
+        "Bob Ross",
+        "New mail",
+        "I sent you this mail.",
+    );
+    new_email.send_email(&mut manager);
     for result in search {
         file_writer.write_file(&result);
     }
 }
-
-
-
-
 
 #[allow(dead_code)]
 fn fetch_inbox_top() -> imap::error::Result<Option<String>> {
