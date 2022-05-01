@@ -3,7 +3,6 @@ extern crate lettre_email;
 
 use lettre::{smtp::authentication::Credentials, SmtpClient, SmtpTransport, Transport};
 use lettre_email::EmailBuilder;
-
 pub struct SmtpConnectionManager {
     pub email_addr: String,
     pub mailer: SmtpTransport,

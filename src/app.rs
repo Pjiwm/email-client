@@ -16,7 +16,7 @@ pub fn run() {
             .build();
 
         // Don't forget to make all widgets visible.
-        win.add(&center_panel::center_box());
+        win.add(&center_panel::login());
         win.show_all();
     });
 
