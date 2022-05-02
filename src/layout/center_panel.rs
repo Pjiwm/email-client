@@ -1,13 +1,15 @@
+use glib::prelude::*;
+use gio::prelude::*;
 use gtk::{
-    traits::{ButtonExt, ContainerExt, WidgetExt},
-    Align, Button, InputPurpose, Orientation,
+    traits::{ButtonExt, ContainerExt, WidgetExt, EntryExt},
+    Align, Box, Button, Entry, InputPurpose, Orientation,
 };
 
 use crate::handlers::email_handler::SmtpConnectionManager;
 
 pub fn login() -> gtk::Box {
-    let parent = gtk::Box::new(Orientation::Vertical, 1);
-    let email = gtk::Entry::builder()
+    let parent = Box::new(Orientation::Vertical, 1);
+    let email = Entry::builder()
         .halign(Align::Center)
         .placeholder_text("Example@example.com")
         .margin_top(10)
@@ -16,7 +18,7 @@ pub fn login() -> gtk::Box {
         .build();
     email.show_all();
 
-    let password = gtk::Entry::builder()
+    let password = Entry::builder()
         .halign(Align::Center)
         .placeholder_text("Password")
         .margin_top(5)
@@ -26,7 +28,7 @@ pub fn login() -> gtk::Box {
         .visibility(false)
         .build();
     password.show_all();
-    let smpt_domain = gtk::Entry::builder()
+    let smpt_domain = Entry::builder()
         .halign(Align::Center)
         .placeholder_text("SMPT domain")
         .margin_top(10)
@@ -43,20 +45,20 @@ pub fn login() -> gtk::Box {
         .margin_top(4)
         .build();
     submit_btn.show_all();
-    // TODO grab actual string from Entry
-    let user = email.clone().to_string();
-    let pass = password.clone();
-    submit_btn.connect_clicked(move |_| {
-        println!("{} {}", user, pass);
-        // let mut manager = SmtpConnectionManager::new("smtp.gmail.com", &user, &pass);
-        // println!("{}", manager.email_addr);
-    });
-
+        
     parent.add(&email);
     parent.add(&password);
     parent.add(&smpt_domain);
     parent.add(&submit_btn);
     parent.set_height_request(600);
     parent.set_width_request(500);
+    
+
+    let input_pass = password.clone();
+    let input_email = email.clone();
+    let input_domain = smpt_domain.clone();
+    submit_btn.connect_clicked(move |_| {
+        println!("Stuff: {} {} {}", &input_pass.text().as_str(), &input_email.text().as_str(), &input_domain.text().as_str());
+    });
     parent
 }
